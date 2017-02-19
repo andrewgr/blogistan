@@ -1,5 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe Author, type: :model do
-  pending "add some examples to (or delete) #{__FILE__}"
+  describe '#valid?' do
+    specify { expect(described_class.new(name: nil)).to be_invalid }
+    specify { expect(described_class.new(name: 'alice')).to be_valid }
+  end
 end
