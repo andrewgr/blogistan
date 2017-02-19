@@ -3,7 +3,12 @@ module EventSourced
     include Potoroo::AggregateRoot
     include Potoroo::Projection
 
-    attr_reader :author_id, :body, :state, :published_at
+    attr_reader(
+      :author_id,
+      :body,
+      :state,
+      :published_at
+    )
 
     def create(author_id, body)
       raise(ArgumentError, 'author_id cannot be empty') if author_id.blank?
