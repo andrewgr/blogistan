@@ -8,5 +8,8 @@ RSpec.describe EventSourced::Comment, type: :model do
 
   describe '#post' do
     specify { expect { comment.post('1', '2', 'Lol') }.to change { comment.body }.from(nil).to('Lol') }
+    specify { expect { comment.post('', '2', 'Lol') }.to raise_error(ArgumentError) }
+    specify { expect { comment.post('1', '', 'Lol') }.to raise_error(ArgumentError) }
+    specify { expect { comment.post('1', '2', '') }.to raise_error(ArgumentError) }
   end
 end
