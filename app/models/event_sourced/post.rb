@@ -48,5 +48,18 @@ module EventSourced
     def published?
       state == :published
     end
+
+    def delete
+      raise(StandardError, 'cannot delete post that has not been created') if state == nil
+      return self if state == :deleted
+
+      emit PostDeleted
+    end
+
+    apply(PostDeleted) do |e|
+      @state = :deleted
+      @published_at = nil
+      @deleted_at = e.deleted_at
+    end
   end
 end

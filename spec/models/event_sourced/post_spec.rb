@@ -48,4 +48,24 @@ RSpec.describe EventSourced::Post, type: :model do
       end
     end
   end
+
+  describe '#delete' do
+    context 'when post is not created' do
+      specify { expect { post.delete }.to raise_error(StandardError) }
+    end
+
+    context 'when post is created' do
+      context 'when post is not published' do
+        subject(:post) { described_class.new(aggregate_id, event_sink).create('1', 'Lol') }
+
+        specify { expect { post.delete }.to change { post.state }.from(:hidden).to(:deleted) }
+      end
+
+      context 'when post is published' do
+        subject(:post) { described_class.new(aggregate_id, event_sink).create('1', 'Lol').publish }
+
+        specify { expect { post.delete }.to change { post.state }.from(:published).to(:deleted) }
+      end
+    end
+  end
 end
