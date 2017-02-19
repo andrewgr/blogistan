@@ -59,12 +59,14 @@ RSpec.describe EventSourced::Post, type: :model do
         subject(:post) { described_class.new(aggregate_id, event_sink).create('1', 'Lol') }
 
         specify { expect { post.delete }.to change { post.state }.from(:hidden).to(:deleted) }
+        specify { expect { post.delete }.to change { post.deleted_at }.from(nil) }
       end
 
       context 'when post is published' do
         subject(:post) { described_class.new(aggregate_id, event_sink).create('1', 'Lol').publish }
 
         specify { expect { post.delete }.to change { post.state }.from(:published).to(:deleted) }
+        specify { expect { post.delete }.to change { post.deleted_at }.from(nil) }
       end
     end
   end

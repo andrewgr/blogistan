@@ -7,7 +7,8 @@ module EventSourced
       :author_id,
       :body,
       :state,
-      :published_at
+      :published_at,
+      :deleted_at
     )
 
     def create(author_id, body)
@@ -53,7 +54,7 @@ module EventSourced
       raise(StandardError, 'cannot delete post that has not been created') if state == nil
       return self if state == :deleted
 
-      emit PostDeleted
+      emit PostDeleted, deleted_at: DateTime.now
     end
 
     apply(PostDeleted) do |e|
