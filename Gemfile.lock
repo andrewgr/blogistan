@@ -1,3 +1,8 @@
+PATH
+  remote: ../potoroo
+  specs:
+    potoroo (0.1.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -184,6 +189,7 @@ DEPENDENCIES
   jquery-rails
   listen (~> 3.0.5)
   pg (~> 0.18)
+  potoroo!
   puma (~> 3.0)
   rails (~> 5.0.1)
   rspec-rails
