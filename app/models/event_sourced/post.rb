@@ -7,6 +7,7 @@ module EventSourced
       :author_id,
       :body,
       :state,
+      :created_at,
       :published_at,
       :deleted_at,
       :updated_at
@@ -16,18 +17,20 @@ module EventSourced
       raise(ArgumentError, 'author_id cannot be empty') if author_id.blank?
       raise(ArgumentError, 'body cannot be empty')      if body.blank?
 
-      emit PostCreated, author_id: author_id, body: body
+      emit PostCreated, author_id: author_id, body: body, created_at: DateTime.now
     end
 
     apply(PostCreated) do |e|
       @state = :hidden
       @author_id = e.author_id
       @body = e.body
+      @created_at = e.created_at
     end
 
     def update(body)
       raise(StandardError, 'cannot update post that has not been created') if state == nil
       raise(StandardError, 'cannot update post that has been deleted') if deleted?
+      raise(ArgumentError, 'body cannot be empty')      if body.blank?
 
       emit PostUpdated, body: body, updated_at: DateTime.now
     end

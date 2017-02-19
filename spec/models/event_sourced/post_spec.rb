@@ -8,6 +8,7 @@ RSpec.describe EventSourced::Post, type: :model do
 
   describe '#create' do
     specify { expect { post.create('1', 'Lol') }.to change { post.state }.from(nil).to(:hidden) }
+    specify { expect { post.create('1', 'Lol') }.to change { post.created_at }.from(nil) }
     specify { expect { post.create('', 'Lol') }.to raise_error(ArgumentError) }
     specify { expect { post.create('1', '') }.to raise_error(ArgumentError) }
   end
@@ -55,7 +56,7 @@ RSpec.describe EventSourced::Post, type: :model do
     end
 
     context 'when post is created' do
-      context 'when post is not published' do
+      context 'when post is hidden' do
         subject(:post) { described_class.new(aggregate_id, event_sink).create('1', 'Lol') }
 
         specify { expect { post.delete }.to change { post.state }.from(:hidden).to(:deleted) }
@@ -79,12 +80,13 @@ RSpec.describe EventSourced::Post, type: :model do
     end
 
     context 'when post is created' do
-      context 'when post is not published' do
+      context 'when post is hidden' do
         subject(:post) { described_class.new(aggregate_id, event_sink).create('1', 'Lol') }
 
         specify { expect { post.update('LMAO') }.not_to change { post.state }.from(:hidden) }
         specify { expect { post.update('LMAO') }.not_to change { post.published? }.from(false) }
         specify { expect { post.update('LMAO') }.to change { post.body }.from('Lol').to('LMAO') }
+        specify { expect { post.update('') }.to raise_error(ArgumentError) }
       end
 
       context 'when post is published' do
@@ -93,6 +95,7 @@ RSpec.describe EventSourced::Post, type: :model do
         specify { expect { post.update('LMAO') }.not_to change { post.state }.from(:published) }
         specify { expect { post.update('LMAO') }.not_to change { post.published? }.from(true) }
         specify { expect { post.update('LMAO') }.to change { post.body }.from('Lol').to('LMAO') }
+        specify { expect { post.update('') }.to raise_error(ArgumentError) }
       end
     end
 
