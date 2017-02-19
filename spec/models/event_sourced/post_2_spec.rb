@@ -4,7 +4,7 @@ RSpec.describe EventSourced::Post, type: :model do
   let(:aggregate_id) { SecureRandom.uuid }
   let(:event_sink)   { Potoroo::EventSink.new }
 
-  context 'when post has not been created' do
+  context 'when post state is nil' do
     subject(:post) { described_class.new(aggregate_id, event_sink) }
 
     describe '#create' do
@@ -31,7 +31,7 @@ RSpec.describe EventSourced::Post, type: :model do
     end
   end
 
-  context 'when post is hidden' do
+  context 'when post state is :hidden' do
     subject(:post) { described_class.new(aggregate_id, event_sink).create('1', 'Lol') }
 
     describe '#create' do
@@ -63,7 +63,7 @@ RSpec.describe EventSourced::Post, type: :model do
     end
   end
 
-  context 'when post is published' do
+  context 'when post state is :published' do
     subject(:post) { described_class.new(aggregate_id, event_sink).create('1', 'Lol').publish }
 
     describe '#create' do
@@ -96,7 +96,7 @@ RSpec.describe EventSourced::Post, type: :model do
     end
   end
 
-  context 'when post is deleted' do
+  context 'when post state is :deleted' do
     subject(:post) { described_class.new(aggregate_id, event_sink).create('1', 'Lol').delete }
 
     describe '#create' do
