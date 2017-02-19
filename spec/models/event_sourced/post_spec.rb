@@ -7,8 +7,8 @@ RSpec.describe EventSourced::Post, type: :model do
   subject(:post) { described_class.new(aggregate_id, event_sink) }
 
   describe '#create' do
-    specify do
-      expect { post.create('1', 'Lol') }.to change { post.state }.from(nil).to(:hidden)
-    end
+    specify { expect { post.create('1', 'Lol') }.to change { post.state }.from(nil).to(:hidden) }
+    specify { expect { post.create('', 'Lol') }.to raise_error(ArgumentError) }
+    specify { expect { post.create('1', '') }.to raise_error(ArgumentError) }
   end
 end
