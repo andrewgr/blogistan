@@ -4,7 +4,6 @@ module EventSourced
     include Potoroo::Projection
 
     attr_reader(
-      :author_id,
       :body,
       :state,
       :created_at,
@@ -13,36 +12,37 @@ module EventSourced
       :updated_at
     )
 
-    def create(author_id, body)
-      raise(StandardError, 'already created') unless state == nil
+    def update(author_id, body)
+      raise(StandardError, 'cannot update post that has been deleted') if deleted?
       raise(ArgumentError, 'author_id cannot be empty') if author_id.blank?
       raise(ArgumentError, 'body cannot be empty')      if body.blank?
 
-      emit PostCreated, author_id: author_id, body: body, created_at: DateTime.now
+      emit PostUpdated, author_id: author_id, body: body, updated_at: DateTime.now
     end
 
     apply(PostCreated) do |e|
-      @state = :hidden
-      @author_id = e.author_id
-      @body = e.body
-      @created_at = e.created_at
-    end
-
-    def update(body)
-      raise(StandardError, 'cannot update post that has not been created') if state == nil
-      raise(StandardError, 'cannot update post that has been deleted') if deleted?
-      raise(ArgumentError, 'body cannot be empty')      if body.blank?
-
-      emit PostUpdated, body: body, updated_at: DateTime.now
-    end
-
-    apply(PostUpdated) do |e|
+      @state = :hidden if @state.nil?
+      @created_at = e.created_at if author_ids.empty?
+      (@author_ids ||= []) << e.author_id
       @body = e.body
       @updated_at = e.updated_at
     end
 
+    apply(PostUpdated) do |e|
+      @state = :hidden if @state.nil?
+      @created_at = e.updated_at if author_ids.empty?
+      (@author_ids ||= []) << e.author_id
+      @body = e.body
+      @updated_at = e.updated_at
+    end
+
+    def author_ids
+      (@author_ids ||= []).uniq
+    end
+
     def publish
       raise(StandardError, 'cannot publish post that has not been created') if state == nil
+      return self if state == :published
       emit PostPublished, published_at: DateTime.now
     end
 

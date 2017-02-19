@@ -7,15 +7,11 @@ RSpec.describe EventSourced::Post, type: :model do
   context 'when post state is nil' do
     subject(:post) { described_class.new(aggregate_id, event_sink) }
 
-    describe '#create' do
-      specify { expect { post.create('1', 'Lol') }.to change { post.state }.from(nil).to(:hidden) }
-      specify { expect { post.create('1', 'Lol') }.to change { post.created_at }.from(nil) }
-      specify { expect { post.create('',  'Lol') }.to raise_error(ArgumentError) }
-      specify { expect { post.create('1', '')    }.to raise_error(ArgumentError) }
-    end
-
     describe '#update' do
-      specify { expect { post.update('LMAO') }.to raise_error(StandardError) }
+      specify { expect { post.update('1', 'Lol') }.to change { post.state }.from(nil).to(:hidden) }
+      specify { expect { post.update('1', 'Lol') }.to change { post.created_at }.from(nil) }
+      specify { expect { post.update('',  'Lol') }.to raise_error(ArgumentError) }
+      specify { expect { post.update('1', '')    }.to raise_error(ArgumentError) }
     end
 
     describe '#publish' do
@@ -32,17 +28,13 @@ RSpec.describe EventSourced::Post, type: :model do
   end
 
   context 'when post state is :hidden' do
-    subject(:post) { described_class.new(aggregate_id, event_sink).create('1', 'Lol') }
-
-    describe '#create' do
-      specify { expect { post.create('1', 'Lol') }.to raise_error(StandardError) }
-    end
+    subject(:post) { described_class.new(aggregate_id, event_sink).update('1', 'Lol') }
 
     describe '#update' do
-      specify { expect { post.update('LMAO') }.not_to change { post.state }.from(:hidden) }
-      specify { expect { post.update('LMAO') }.not_to change { post.published? }.from(false) }
-      specify { expect { post.update('LMAO') }.to change { post.body }.from('Lol').to('LMAO') }
-      specify { expect { post.update('') }.to raise_error(ArgumentError) }
+      specify { expect { post.update('2', 'LMAO') }.not_to change { post.state }.from(:hidden) }
+      specify { expect { post.update('2', 'LMAO') }.not_to change { post.published? }.from(false) }
+      specify { expect { post.update('2', 'LMAO') }.to change { post.body }.from('Lol').to('LMAO') }
+      specify { expect { post.update('2', '') }.to raise_error(ArgumentError) }
     end
 
     describe '#publish' do
@@ -64,17 +56,17 @@ RSpec.describe EventSourced::Post, type: :model do
   end
 
   context 'when post state is :published' do
-    subject(:post) { described_class.new(aggregate_id, event_sink).create('1', 'Lol').publish }
+    subject(:post) { described_class.new(aggregate_id, event_sink).update('1', 'Lol').publish }
 
     describe '#create' do
       specify { expect { post.create('1', 'Lol') }.to raise_error(StandardError) }
     end
 
     describe '#update' do
-      specify { expect { post.update('LMAO') }.not_to change { post.state }.from(:published) }
-      specify { expect { post.update('LMAO') }.not_to change { post.published? }.from(true) }
-      specify { expect { post.update('LMAO') }.to change { post.body }.from('Lol').to('LMAO') }
-      specify { expect { post.update('') }.to raise_error(ArgumentError) }
+      specify { expect { post.update('2', 'LMAO') }.not_to change { post.state }.from(:published) }
+      specify { expect { post.update('2', 'LMAO') }.not_to change { post.published? }.from(true) }
+      specify { expect { post.update('2', 'LMAO') }.to change { post.body }.from('Lol').to('LMAO') }
+      specify { expect { post.update('2', '') }.to raise_error(ArgumentError) }
     end
 
     describe '#publish' do
@@ -97,14 +89,14 @@ RSpec.describe EventSourced::Post, type: :model do
   end
 
   context 'when post state is :deleted' do
-    subject(:post) { described_class.new(aggregate_id, event_sink).create('1', 'Lol').delete }
+    subject(:post) { described_class.new(aggregate_id, event_sink).update('1', 'Lol').delete }
 
     describe '#create' do
       specify { expect { post.create('1', 'Lol') }.to raise_error(StandardError) }
     end
 
     describe '#update' do
-      specify { expect { post.('LMAO') }.to raise_error(StandardError) }
+      specify { expect { post.update('2', 'LMAO') }.to raise_error(StandardError) }
     end
 
     describe '#publish' do
