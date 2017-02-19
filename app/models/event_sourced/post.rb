@@ -62,5 +62,9 @@ module EventSourced
       @published_at = nil
       @deleted_at = e.deleted_at
     end
+
+    def deleted?
+      state == :deleted
+    end
   end
 end

@@ -60,6 +60,7 @@ RSpec.describe EventSourced::Post, type: :model do
 
         specify { expect { post.delete }.to change { post.state }.from(:hidden).to(:deleted) }
         specify { expect { post.delete }.to change { post.deleted_at }.from(nil) }
+        specify { expect { post.delete }.to change { post.deleted? }.from(false).to(true) }
       end
 
       context 'when post is published' do
@@ -67,6 +68,7 @@ RSpec.describe EventSourced::Post, type: :model do
 
         specify { expect { post.delete }.to change { post.state }.from(:published).to(:deleted) }
         specify { expect { post.delete }.to change { post.deleted_at }.from(nil) }
+        specify { expect { post.delete }.to change { post.deleted? }.from(false).to(true) }
       end
     end
   end
