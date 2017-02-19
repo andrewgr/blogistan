@@ -14,6 +14,7 @@ module EventSourced
     )
 
     def create(author_id, body)
+      raise(StandardError, 'already created') unless state == nil
       raise(ArgumentError, 'author_id cannot be empty') if author_id.blank?
       raise(ArgumentError, 'body cannot be empty')      if body.blank?
 
@@ -52,6 +53,7 @@ module EventSourced
 
     def unpublish
       raise(StandardError, 'cannot unpublish post that has not been created') if state == nil
+      raise(StandardError, 'cannot unpublish post that has been deleted') if deleted?
       return self if state == :hidden
 
       emit PostUnpublished
