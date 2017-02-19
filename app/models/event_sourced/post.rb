@@ -24,13 +24,29 @@ module EventSourced
     end
 
     def publish
-      raise(StandardError, 'cannot publish post that has not been created') unless state == :hidden
+      raise(StandardError, 'cannot publish post that has not been created') if state == nil
       emit PostPublished, published_at: DateTime.now
     end
 
     apply(PostPublished) do |e|
       @state = :published
       @published_at = e.published_at
+    end
+
+    def unpublish
+      raise(StandardError, 'cannot unpublish post that has not been created') if state == nil
+      return self if state == :hidden
+
+      emit PostUnpublished
+    end
+
+    apply(PostUnpublished) do |e|
+      @state = :hidden
+      @published_at = nil
+    end
+
+    def published?
+      state == :published
     end
   end
 end

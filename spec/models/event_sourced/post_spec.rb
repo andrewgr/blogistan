@@ -24,4 +24,25 @@ RSpec.describe EventSourced::Post, type: :model do
       specify { expect { post.publish }.to change { post.published_at }.from(nil) }
     end
   end
+
+  describe '#unpublish' do
+    context 'when post is not created' do
+      specify { expect { post.unpublish }.to raise_error(StandardError) }
+    end
+
+    context 'when post is created' do
+      context 'when post is not published' do
+        subject(:post) { described_class.new(aggregate_id, event_sink).create('1', 'Lol') }
+
+        specify { expect { post.unpublish }.not_to change { post.state }.from(:hidden) }
+      end
+
+      context 'when post is published' do
+        subject(:post) { described_class.new(aggregate_id, event_sink).create('1', 'Lol').publish }
+
+        specify { expect { post.unpublish }.to change { post.state }.from(:published).to(:hidden) }
+        specify { expect { post.unpublish }.to change { post.published_at }.to(nil) }
+      end
+    end
+  end
 end

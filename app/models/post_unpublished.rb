@@ -1,0 +1,2 @@
+class PostUnpublished < Event
+end
