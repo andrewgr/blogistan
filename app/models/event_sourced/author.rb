@@ -6,6 +6,7 @@ module EventSourced
     attr_reader :name
 
     def create(name)
+      raise(ArgumentError, 'name cannot be empty') if name.blank?
       emit AuthorCreated, name: name
     end
 

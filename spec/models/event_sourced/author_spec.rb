@@ -8,5 +8,7 @@ RSpec.describe EventSourced::Author, type: :model do
 
   describe '#create' do
     specify { expect { author.create('Alice') }.to change { author.name }.from(nil).to('Alice') }
+    specify { expect { author.create('') }.to raise_error(ArgumentError) }
+    specify { expect { author.create(nil) }.to raise_error(ArgumentError) }
   end
 end
