@@ -22,6 +22,7 @@ RSpec.describe EventSourced::Post, type: :model do
 
       specify { expect { post.publish }.to change { post.state }.from(:hidden).to(:published) }
       specify { expect { post.publish }.to change { post.published_at }.from(nil) }
+      specify { expect { post.publish }.to change { post.published? }.from(false).to(true) }
     end
   end
 
@@ -35,6 +36,7 @@ RSpec.describe EventSourced::Post, type: :model do
         subject(:post) { described_class.new(aggregate_id, event_sink).create('1', 'Lol') }
 
         specify { expect { post.unpublish }.not_to change { post.state }.from(:hidden) }
+        specify { expect { post.unpublish }.not_to change { post.published? }.from(false) }
       end
 
       context 'when post is published' do
@@ -42,6 +44,7 @@ RSpec.describe EventSourced::Post, type: :model do
 
         specify { expect { post.unpublish }.to change { post.state }.from(:published).to(:hidden) }
         specify { expect { post.unpublish }.to change { post.published_at }.to(nil) }
+        specify { expect { post.unpublish }.to change { post.published? }.from(true).to(false) }
       end
     end
   end
