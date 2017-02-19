@@ -8,7 +8,8 @@ module EventSourced
       :body,
       :state,
       :published_at,
-      :deleted_at
+      :deleted_at,
+      :updated_at
     )
 
     def create(author_id, body)
@@ -22,6 +23,18 @@ module EventSourced
       @state = :hidden
       @author_id = e.author_id
       @body = e.body
+    end
+
+    def update(body)
+      raise(StandardError, 'cannot update post that has not been created') if state == nil
+      raise(StandardError, 'cannot update post that has been deleted') if deleted?
+
+      emit PostUpdated, body: body, updated_at: DateTime.now
+    end
+
+    apply(PostUpdated) do |e|
+      @body = e.body
+      @updated_at = e.updated_at
     end
 
     def publish

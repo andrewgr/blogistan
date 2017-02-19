@@ -32,7 +32,7 @@ RSpec.describe EventSourced::Post, type: :model do
     end
 
     context 'when post is created' do
-      context 'when post is not published' do
+      context 'when post is hidden' do
         subject(:post) { described_class.new(aggregate_id, event_sink).create('1', 'Lol') }
 
         specify { expect { post.unpublish }.not_to change { post.state }.from(:hidden) }
@@ -70,6 +70,36 @@ RSpec.describe EventSourced::Post, type: :model do
         specify { expect { post.delete }.to change { post.deleted_at }.from(nil) }
         specify { expect { post.delete }.to change { post.deleted? }.from(false).to(true) }
       end
+    end
+  end
+
+  describe '#update' do
+    context 'when post is not created' do
+      specify { expect { post.update('LMAO') }.to raise_error(StandardError) }
+    end
+
+    context 'when post is created' do
+      context 'when post is not published' do
+        subject(:post) { described_class.new(aggregate_id, event_sink).create('1', 'Lol') }
+
+        specify { expect { post.update('LMAO') }.not_to change { post.state }.from(:hidden) }
+        specify { expect { post.update('LMAO') }.not_to change { post.published? }.from(false) }
+        specify { expect { post.update('LMAO') }.to change { post.body }.from('Lol').to('LMAO') }
+      end
+
+      context 'when post is published' do
+        subject(:post) { described_class.new(aggregate_id, event_sink).create('1', 'Lol').publish }
+
+        specify { expect { post.update('LMAO') }.not_to change { post.state }.from(:published) }
+        specify { expect { post.update('LMAO') }.not_to change { post.published? }.from(true) }
+        specify { expect { post.update('LMAO') }.to change { post.body }.from('Lol').to('LMAO') }
+      end
+    end
+
+    context 'when post is deleted' do
+      subject(:post) { described_class.new(aggregate_id, event_sink).create('1', 'Lol').deleted }
+
+      specify { expect { post.update('LMAO') }.to raise_error(StandardError) }
     end
   end
 end
